@@ -5,15 +5,15 @@
   :url "https://github.com/jaju/duckling-clj"
   :plugins [[lein-midje "3.2.1"]]
   :repl-options {:init-ns duckling.core}
-  :dependencies [[org.clojure/clojure "1.10.0"]
+  :dependencies [[org.clojure/clojure "1.10.1"]
                  [org.clojure/tools.nrepl "0.2.13"]
-                 [org.clojure/tools.logging "0.4.1"]
-                 [clj-time "0.15.1"]
+                 [org.clojure/tools.logging "0.5.0"]
+                 [clj-time "0.15.2"]
                  [prismatic/plumbing "0.5.5"]]
   :deploy-repositories [["clojars" {:creds :gpg}]]
   :profiles {:dev {:dependencies [[org.clojure/tools.trace "0.7.10"]
-                                  [midje "1.9.4"]
-                                  [cheshire "5.8.1"]]}
+                                  [midje "1.9.9"]
+                                  [cheshire "5.9.0"]]}
              :uberjar {:aot [duckling.core]}}
   :test-selectors {:default (complement :benchmark)
                    :benchmark :benchmark}
