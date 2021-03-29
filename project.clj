@@ -11,17 +11,17 @@
 
   :repl-options {:init-ns duckling.core}
 
-  :dependencies [[org.clojure/clojure "1.10.1"]
+  :dependencies [[org.clojure/clojure "1.10.3"]
                  [org.clojure/tools.nrepl "0.2.13"]
-                 [org.clojure/tools.logging "0.5.0"]
+                 [org.clojure/tools.logging "1.1.0"]
                  [clj-time "0.15.2"]
                  [prismatic/plumbing "0.5.5"]]
 
   :deploy-repositories [["clojars" {:creds :gpg}]]
 
-  :profiles {:dev     {:dependencies [[org.clojure/tools.trace "0.7.10"]
-                                      [midje "1.9.9"]
-                                      [cheshire "5.9.0"]]}
+  :profiles {:dev     {:dependencies [[org.clojure/tools.trace "0.7.11"]
+                                      [midje "1.9.10"]
+                                      [cheshire "5.10.0"]]}
              :uberjar {:aot [duckling.core]}}
 
   :test-selectors {:default   (complement :benchmark)
