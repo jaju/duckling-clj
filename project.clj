@@ -1,4 +1,4 @@
-(defproject org.msync/duckling "0.4.24"
+(defproject org.msync/duckling "0.4.25-SNAPSHOT"
 
   :description "General entities parser"
 
