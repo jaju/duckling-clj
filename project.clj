@@ -2,7 +2,7 @@
 
   :description "General entities parser"
 
-  :license {:url      "https://github.com/jaju/duckling-clj"
+  :license {:url "https://github.com/jaju/duckling-clj"
             :comments "see LICENSE"}
 
   :url "https://github.com/jaju/duckling-clj"
@@ -17,25 +17,21 @@
 
   :deploy-repositories [["clojars" {:creds :gpg}]]
 
-  :profiles {:dev     {:dependencies [[org.clojure/tools.trace "0.7.11"]
-                                      [org.clojure/tools.nrepl "0.2.13"]
-                                      [org.clojure/tools.logging "1.1.0"]
-                                      [midje "1.9.10"]
-                                      [cheshire "5.10.0"]]}
+  :profiles {:dev {:dependencies [[org.clojure/tools.trace "0.7.11"]
+                                  [org.clojure/tools.nrepl "0.2.13"]
+                                  [org.clojure/tools.logging "1.1.0"]
+                                  [midje "1.9.10"]
+                                  [cheshire "5.10.0"]]}
              :uberjar {:aot [duckling.core]}}
 
-  :test-selectors {:default   (complement :benchmark)
+  :test-selectors {:default (complement :benchmark)
                    :benchmark :benchmark}
 
   :scm {:name "git"
-        :url  "https://github.com/jaju/duckling-clj"}
+        :url "https://github.com/jaju/duckling-clj"}
 
   :pom-addition [:developers
-                 [:developer
-                  [:name "Wit.ai"]
-                  [:url "https://wit.ai"]
-                  [:email "contact@wit.ai"]
-                  [:timezone "-7"]]
+                 ;; wit.ai is the originating dev entity
                  [:developer
                   [:name "Ravindra Jaju"]
                   [:url "https://msync.org/"]
