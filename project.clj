@@ -1,6 +1,6 @@
-(defproject wit/duckling "0.4.25-SNAPSHOT"
+(defproject org.msync/duckling "0.4.25-SNAPSHOT"
 
-  :description "Date & Number parser"
+  :description "General entities parser"
 
   :license {:url      "https://github.com/jaju/duckling-clj"
             :comments "see LICENSE"}
@@ -12,14 +12,14 @@
   :repl-options {:init-ns duckling.core}
 
   :dependencies [[org.clojure/clojure "1.10.3"]
-                 [org.clojure/tools.nrepl "0.2.13"]
-                 [org.clojure/tools.logging "1.1.0"]
                  [clj-time "0.15.2"]
                  [prismatic/plumbing "0.5.5"]]
 
   :deploy-repositories [["clojars" {:creds :gpg}]]
 
   :profiles {:dev     {:dependencies [[org.clojure/tools.trace "0.7.11"]
+                                      [org.clojure/tools.nrepl "0.2.13"]
+                                      [org.clojure/tools.logging "1.1.0"]
                                       [midje "1.9.10"]
                                       [cheshire "5.10.0"]]}
              :uberjar {:aot [duckling.core]}}
