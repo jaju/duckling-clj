@@ -7,8 +7,6 @@
 
   :url "https://github.com/jaju/duckling-clj"
 
-  :plugins [[lein-midje "3.2.1"]]
-
   :repl-options {:init-ns duckling.core}
 
   :dependencies [[org.clojure/clojure "1.10.3"]
@@ -20,7 +18,6 @@
   :profiles {:dev {:dependencies [[org.clojure/tools.trace "0.7.11"]
                                   [org.clojure/tools.nrepl "0.2.13"]
                                   [org.clojure/tools.logging "1.1.0"]
-                                  [midje "1.9.10"]
                                   [cheshire "5.10.0"]]}
              :uberjar {:aot [duckling.core]}}
 
