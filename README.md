@@ -1,12 +1,12 @@
-# Deprecation notice
+# Undeprecation notice
 
-As of May 1st, 2017 we're deprecating this repository in favor of [the new Duckling](https://github.com/facebookincubator/duckling). See our [blog post announcement](https://wit.ai/blog/2017/05/01/new-duckling).
+As of April 3rd, 2021 we're reviving this Clojure library, attempting to add support for Clojurescript as well.
 
-Thanks to all the contributors!
+Thanks to [Wit](https://wit.ai) for the code!
 
 # Duckling
 
-[![Clojars Project](https://clojars.org/wit/duckling/latest-version.svg)](http://clojars.org/wit/duckling)
+[![Clojars Project](https://clojars.org/org.msync/duckling/latest-version.svg)](http://clojars.org/jaju/duckling-clj)
 
 Duckling is a Clojure library that parses text into structured data:
 

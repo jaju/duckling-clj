@@ -1,4 +1,4 @@
-(defproject org.msync/duckling "0.4.25-SNAPSHOT"
+(defproject org.msync/duckling "0.4.24"
 
   :description "General entities parser"
 
@@ -13,7 +13,8 @@
                  [clj-time "0.15.2"]
                  [prismatic/plumbing "0.5.5"]]
 
-  :deploy-repositories [["clojars" {:creds :gpg}]]
+  :deploy-repositories [["releases" :clojars]
+                        ["snapshots" :clojars]]
 
   :profiles {:dev {:dependencies [[org.clojure/tools.trace "0.7.11"]
                                   [org.clojure/tools.nrepl "0.2.13"]
