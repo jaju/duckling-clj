@@ -1,11 +1,15 @@
 (ns duckling.qa
   (:require [duckling.core :as p]
-            [clojure.string :as strings]
-            [cheshire.core :as j]))
+            [clojure.string :as strings]))
+
+(def parse-json
+  #_cheshire.core/parse-string                              ;; FIXME - We depend on it
+  identity
+  )
 
 (defn go
   ([module-id]
-   (let [all (j/parse-string (slurp "resources/export.json"))
+   (let [all (parse-json (slurp "resources/export.json"))
         en (get (first (filter #(= module-id
                                    (keyword (str (% "body") "$core"))) all)) "start")
         ;en (take 100 en)

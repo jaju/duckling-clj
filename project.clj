@@ -17,8 +17,7 @@
 
   :profiles {:dev {:dependencies [[org.clojure/tools.trace "0.7.11"]
                                   [org.clojure/tools.nrepl "0.2.13"]
-                                  [org.clojure/tools.logging "1.1.0"]
-                                  [cheshire "5.10.0"]]}
+                                  [org.clojure/tools.logging "1.1.0"]]}
              :uberjar {:aot [duckling.core]}}
 
   :test-selectors {:default (complement :benchmark)
