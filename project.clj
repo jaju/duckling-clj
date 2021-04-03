@@ -11,14 +11,14 @@
 
   :dependencies [[org.clojure/clojure "1.10.3"]
                  [clj-time "0.15.2"]
-                 [prismatic/plumbing "0.5.5"]]
+                 [org.clojure/tools.logging "1.1.0"]]
 
   :deploy-repositories [["releases" :clojars]
                         ["snapshots" :clojars]]
 
   :profiles {:dev {:dependencies [[org.clojure/tools.trace "0.7.11"]
                                   [org.clojure/tools.nrepl "0.2.13"]
-                                  [org.clojure/tools.logging "1.1.0"]]}
+                                  [prismatic/plumbing "0.5.5"]]}
              :uberjar {:aot [duckling.core]}}
 
   :test-selectors {:default (complement :benchmark)

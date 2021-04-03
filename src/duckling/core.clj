@@ -1,16 +1,14 @@
 (ns duckling.core
-  (:use [clojure.tools.logging :exclude [trace]]
-        [plumbing.core])
-  (:require [clojure.java.io :as io]
+  (:require [clojure.tools.logging :refer [errorf warnf infof]]
+            [clojure.java.io :as io]
             [clojure.set :as set]
             [clojure.string :as string]
             [duckling.corpus :as corpus]
             [duckling.engine :as engine]
             [duckling.learn :as learn]
             [duckling.resource :as res]
-            [duckling.time.api :as api]
             [duckling.time.obj :as time]
-            [duckling.util :as util]))
+            [duckling.util :as util :refer [?> ?>>]]))
 
 (defonce rules-map (atom {}))
 (defonce corpus-map (atom {}))

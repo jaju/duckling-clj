@@ -1,8 +1,7 @@
 (ns duckling.corpus
-  (:use     [clojure.tools.logging]
-            [plumbing.core :except [millis]])
-  (:require [duckling.time.obj :as time]
-            [duckling.util :as util]))
+  (:require [clojure.tools.logging]
+            [duckling.time.obj :as time]
+            [duckling.util :as util :refer [?>]]))
 
 ; Checker functions return *nil* when OK, or [expected actual] when not OK
 

@@ -1,18 +1,7 @@
 (ns duckling.util
   (:use [clojure.tools.logging :exclude [trace]])
-  (:require [clojure.string  :as string]
-            [clojure.set     :as sets]
-            [clojure.java.io :as io]
-            [clj-time.core :as t]
-            [clj-time.format :as tf]
-            [clojure.repl :as repl]
-            [clojure.pprint :as pprint]
-            [clj-time.coerce :as tcoerce])
-  (:import [java.io IOException OutputStream StringReader]
-           [java.math BigInteger]
-           [java.lang.management ManagementFactory]
-           [java.io StringWriter]
-           [org.joda.time DateTimeZone DateTime]))
+  (:require [clojure.pprint :as pprint])
+  (:import [java.io StringWriter]))
 
 (defn hash-match
   "Matching hashmap over hashmap. Keys can be functions.
@@ -104,3 +93,17 @@
   (let [w (StringWriter.)]
     (pprint/pprint m w)
     (.toString w)))
+
+(defmacro ?>>
+  "Conditional double-arrow operation (->> nums (?>> inc-all? (map inc)))"
+  [do-it? & args]
+  `(if ~do-it?
+     (->> ~(last args) ~@(butlast args))
+     ~(last args)))
+
+(defmacro ?>
+  "Conditional single-arrow operation (-> m (?> add-kv? (assoc :k :v)))"
+  [arg do-it? & rest]
+  `(if ~do-it?
+     (-> ~arg ~@rest)
+     ~arg))

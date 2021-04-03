@@ -1,6 +1,4 @@
-(ns duckling.ml.naivebayes
-  (:use [clojure.test])
-  (:require [clojure.string :as strings]))
+(ns duckling.ml.naivebayes)
 
 ;; accessors
 (defn datum-features [datum] (first datum))

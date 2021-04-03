@@ -1,7 +1,6 @@
 (ns duckling.time.api
   (:require [duckling.time.pred :as pred]
-            [duckling.time.obj :as t]
-            [clj-time.coerce :as c])
+            [duckling.time.obj :as t])
   (:refer-clojure :exclude [resolve]))
 
 (defn resolve

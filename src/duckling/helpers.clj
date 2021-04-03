@@ -1,8 +1,5 @@
 (ns duckling.helpers
-  "This namespace contains the common helpers used in rules"
-  (:require
-    [clj-time.core :as t]
-    [duckling.util :as util]))
+  "This namespace contains the common helpers used in rules")
 
 (defmacro fn& [dim & args-body]
   (let [meta-map (when (-> args-body first map?)

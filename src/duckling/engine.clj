@@ -5,8 +5,7 @@
   2. rules are (recursively) matched based on theirs pattern vectors.
   3. tokens containing final info are produced using their production rules"
   (:use [clojure.tools.logging])
-  (:require [clojure.set :as sets]
-            [clojure.stacktrace]
+  (:require [clojure.stacktrace]
             [duckling.time.prod]
             [duckling.time.api :as time]
             [duckling.util :as util]))

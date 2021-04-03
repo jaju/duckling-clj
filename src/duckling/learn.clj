@@ -1,12 +1,10 @@
 (ns duckling.learn
-  (:use [clojure.tools.logging]
-        [clojure.pprint :only [pprint]])
   (:require
     [duckling.engine :as engine]
-    [clj-time.core :as t]
     [duckling.ml.naivebayes :as naive]
     [duckling.util :as util]
-    [clojure.set :as sets])
+    [clojure.set :as sets]
+    [clojure.pprint :refer [pprint]])
   (:use [clojure.tools.logging]))
 
 (defn extract-route-features
