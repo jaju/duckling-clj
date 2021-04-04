@@ -1,8 +1,7 @@
 (ns duckling.core-test
   (:use [duckling.core]
         [clojure.test])
-  (:require [clojure.java.io :as io]
-            [plumbing.core :refer [map-from-keys map-vals]]
+  (:require [plumbing.core :refer [map-from-keys map-vals]]
             [duckling.resource :as res]))
 
 (def tokens (map (fn [x] {:pred x}) (range 10)))
@@ -103,23 +102,16 @@
       (testing "load! should load all languages by default"
         (with-redefs [res/get-files (constantly ["numbers.clj"])
                       res/get-subdirs (constantly ["en" "zh" "pt"])]
-          (are [arg] (check arg [:en$core :zh$core :pt$core])
-            nil
-            {}
-            {:config {} :languages []})))
+          (= (load!) [:en$core :zh$core :pt$core])))
       (testing "load! should accept a list of languages"
-        (are [arg exp] (check {:languages arg} exp)
+        (are [arg exp] (check arg exp)
           ["fr"] [:fr$core]
           ["foo" "bar"] []
           ["bar" "es" "pt" "ru"] [:es$core :pt$core :ru$core]))
-      (testing "load! should accept a custom config"
-        (is (check {:config {:en$numbers {:corpus ["numbers"] :rules ["numbers"]}}} [:en$numbers])))
+      (testing "load! should accept a map config"
+        (is (check {:en$numbers {:corpus ["numbers"] :rules ["numbers"]}} [:en$numbers])))
       (testing "load! should return a map of loaded modules with dimensions"
         (are [arg exp] (check arg exp)
-          {:languages ["fr"]} [:fr$core]
-          {:languages ["fr" "foo" "en"]} [:fr$core :en$core]
-          {:config {:en$numbers {:corpus ["numbers"] :rules ["numbers"]}}} [:en$numbers]
-
-          {:config {:en$numbers {:corpus ["numbers"] :rules ["numbers"]}}
-           :languages ["fr" "blah"]}
-          [:fr$core :en$numbers])))))
+          ["fr"] [:fr$core]
+          ["fr" "foo" "en"] [:fr$core :en$core]
+          {:en$numbers {:corpus ["numbers"] :rules ["numbers"]}} [:en$numbers])))))
