@@ -50,7 +50,7 @@
   (load!)
   (testing "fr and en"
     (are [lang] (let [module (format "%s$core" lang)]
-                  (= :ok (-> (get @corpus-map module)
+                  (= :ok (-> (get @module->corpus module)
                              (run-corpus module)
                              diag-corpus)))
       "fr"

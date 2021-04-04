@@ -10,9 +10,9 @@
             [duckling.time.obj :as time]
             [duckling.util :as util :refer [?> ?>>]]))
 
-(defonce rules-map (atom {}))
-(defonce corpus-map (atom {}))
-(defonce classifiers-map (atom {}))
+(defonce module->rules (atom {}))
+(defonce module->corpus (atom {}))
+(defonce module->classifiers (atom {}))
 
 (defn default-context
   "Build a default context for testing. opt can be either :corpus or :now"
@@ -21,15 +21,11 @@
                      :corpus (time/t -2 2013 2 12 4 30)
                      :now (time/now))})
 
-(defn- get-classifier
-  [id]
-  (when id
-    (get @classifiers-map (keyword id))))
+(defn- get-classifier [id]
+  (get @module->classifiers (keyword id)))
 
-(defn- get-rules
-  [id]
-  (when id
-    (get @rules-map (keyword id))))
+(defn- get-rules [id]
+  (get @module->rules (keyword id)))
 
 (defn- compare-tokens
   "Compares two candidate tokens a and b for runtime selection.
@@ -289,38 +285,48 @@
     langs (set/intersection (set langs))
     true gen-config-for-langs))
 
-(defn load*!
-  "(Re)loads rules and classifiers for languages or/and config.
-   If no language list nor config provided, loads all languages.
-   Returns a map of loaded modules with available dimensions."
-  [config]
-  (reset! rules-map {})
-  (reset! corpus-map {})
-  (let [data (->> config
-               (pmap (fn [[config-key {corpus-files :corpus rules-files :rules}]]
-                       (let [lang (-> config-key name (string/split #"\$") first)
-                             corpus (make-corpus lang corpus-files)
-                             rules (make-rules lang rules-files)
-                             c (learn/train-classifiers corpus rules learn/extract-route-features)]
-                         [config-key {:corpus corpus :rules rules :classifier c}])))
+(defn- pluck-lang [lang-key]
+  (-> lang-key name (string/split #"\$") first))
+
+(defn- load-language-data [[lang-key {corpus-files :corpus rules-files :rules}]]
+  (let [lang (pluck-lang lang-key)
+        corpus (make-corpus lang corpus-files)
+        rules (make-rules lang rules-files)
+        classifier (learn/train-classifiers corpus rules learn/extract-route-features)]
+    [lang-key
+     {:lang lang
+      :lang-key lang-key
+      :corpus corpus
+      :rules rules
+      :classifier classifier}]))
+
+(defn- load*!
+  [lang-key->config]
+  (reset! module->rules {})
+  (reset! module->corpus {})
+  (let [data (->> lang-key->config
+               (pmap load-language-data)
                (into {}))]
     (doseq [[config-key {:keys [classifier corpus rules]}] data]
-      (swap! corpus-map assoc config-key corpus)
-      (swap! rules-map assoc config-key rules)
-      (swap! classifiers-map assoc config-key classifier)))
-  (->> @corpus-map
+      (swap! module->corpus assoc config-key corpus)
+      (swap! module->rules assoc config-key rules)
+      (swap! module->classifiers assoc config-key classifier)))
+  (->> @module->corpus
     (pmap (fn [[module corpus]]
             [module (get-dims module corpus)]))
     (into {})))
 
 
 (defn load!
+  "Loads rules and classifiers for languages or/and config.
+   If no language list nor config provided, loads all languages.
+   Returns a map of loaded modules with available dimensions."
   ([] (load! (into [] (available-languages))))
   ([args]
-   (let [config (if (vector? args)
-                  (config-from-languages args)
-                  args)]
-     (load*! config))))
+   (let [lang-key->config (if (vector? args)
+                            (config-from-languages args)
+                            args)]
+     (load*! lang-key->config))))
 
 ;--------------------------------------------------------------------------
 ; Corpus running
@@ -346,13 +352,13 @@
 (defn run
   "Runs the corpus and prints the results to the terminal."
   ([]
-   (run (keys @corpus-map)))
+   (run (keys @module->corpus)))
   ([module-id]
    (loop [[mod & more] (if (seq? module-id) module-id [module-id])
           line 0
           acc []]
      (if mod
-       (let [output (run-corpus (mod @corpus-map) mod)
+       (let [output (run-corpus (mod @module->corpus) mod)
              failed (remove (comp (partial = 0) first) output)]
          (doseq [[[error-count text error-msg] i] (map vector failed (iterate inc line))]
            (printf "%d FAIL \"%s\"\n    Expected %s\n" i text (first error-msg))
@@ -414,7 +420,7 @@
               [module targets]                              ; targets specify all the dims we should extract
               (let [module (keyword module)
                     pic-context (generate-context context)]
-                (when-not (module @rules-map)
+                (when-not (module @module->rules)
                   (throw (ex-info "Unknown duckling module" {:module module})))
                 (->> (analyze sentence pic-context module targets leven-stash)
                   :winners
