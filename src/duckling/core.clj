@@ -21,7 +21,7 @@
                      :corpus (time/t -2 2013 2 12 4 30)
                      :now (time/now))})
 
-(defn- get-classifier [id]
+(defn- get-classifiers [id]
   (get @module->classifiers (keyword id)))
 
 (defn- get-rules [id]
@@ -81,7 +81,7 @@
    If no targets specified, all winners are returned."
   [s context module targets base-stash]
   {:pre [s context module]}
-  (let [classifiers (get-classifier module)
+  (let [classifiers (get-classifiers module)
         _ (when-not (map? classifiers)
             (errorf "[duckling] Module %s is not loaded. Did you (load!)?" module))
         rules (get-rules module)
@@ -185,7 +185,7 @@
           winners :winners} (analyze s context module-id targets nil)]
 
      ;; 1. print stash
-     (print-stash stash (get-classifier module-id) winners)
+     (print-stash stash (get-classifiers module-id) winners)
 
      ;; 2. print winners
      (printf "\n%d winners:\n" (count winners))
@@ -199,7 +199,7 @@
      ;; 3. ask for details
      (printf "For further info: (details idx) where 1 <= idx <= %d\n" (dec (count stash)))
      (def details (fn [n]
-                    (print-tokens (nth stash n) (get-classifier module-id))))
+                    (print-tokens (nth stash n) (get-classifiers module-id))))
      (def token (fn [n]
                   (nth stash n))))))
 
@@ -300,10 +300,12 @@
       :rules rules
       :classifier classifier}]))
 
-(defn- load*!
-  [lang-key->config]
+(defn clear! []
   (reset! module->rules {})
   (reset! module->corpus {})
+  (reset! module->classifiers {}))
+
+(defn- load*! [lang-key->config]
   (let [data (->> lang-key->config
                (pmap load-language-data)
                (into {}))]
