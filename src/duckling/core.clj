@@ -10,9 +10,8 @@
             [duckling.time.obj :as time]
             [duckling.util :as util :refer [?> ?>>]]))
 
-(defonce module->rules (atom {}))
-(defonce module->corpus (atom {}))
-(defonce module->classifiers (atom {}))
+(defrecord RCC [lang lang-key rules corpus classifiers])
+(defonce language->data (atom {}))
 
 (defn default-context
   "Build a default context for testing. opt can be either :corpus or :now"
@@ -22,10 +21,13 @@
                      :now (time/now))})
 
 (defn- get-classifiers [id]
-  (get @module->classifiers (keyword id)))
+  (get-in @language->data [(keyword id) :classifiers]))
 
 (defn- get-rules [id]
-  (get @module->rules (keyword id)))
+  (get-in @language->data [(keyword id) :rules]))
+
+(defn- get-corpus [id]
+  (get-in @language->data [(keyword id) :corpus]))
 
 (defn- compare-tokens
   "Compares two candidate tokens a and b for runtime selection.
@@ -292,29 +294,26 @@
   (let [lang (pluck-lang lang-key)
         corpus (make-corpus lang corpus-files)
         rules (make-rules lang rules-files)
-        classifier (learn/train-classifiers corpus rules learn/extract-route-features)]
+        classifiers (learn/train-classifiers corpus rules learn/extract-route-features)]
     [lang-key
-     {:lang lang
-      :lang-key lang-key
-      :corpus corpus
-      :rules rules
-      :classifier classifier}]))
+     (map->RCC {:lang lang
+                :lang-key lang-key
+                :corpus corpus
+                :rules rules
+                :classifiers classifiers})]))
 
 (defn clear! []
-  (reset! module->rules {})
-  (reset! module->corpus {})
-  (reset! module->classifiers {}))
+  (reset! language->data {}))
 
 (defn- load*! [lang-key->config]
+  (clear!)
   (let [data (->> lang-key->config
                (pmap load-language-data)
                (into {}))]
-    (doseq [[config-key {:keys [classifier corpus rules]}] data]
-      (swap! module->corpus assoc config-key corpus)
-      (swap! module->rules assoc config-key rules)
-      (swap! module->classifiers assoc config-key classifier)))
-  (->> @module->corpus
-    (pmap (fn [[module corpus]]
+    (doseq [[config-key rcc] data]
+      (swap! language->data assoc config-key rcc)))
+  (->> @language->data
+    (pmap (fn [[module {:keys [corpus]}]]
             [module (get-dims module corpus)]))
     (into {})))
 
@@ -354,13 +353,13 @@
 (defn run
   "Runs the corpus and prints the results to the terminal."
   ([]
-   (run (keys @module->corpus)))
+   (run (keys @language->data)))
   ([module-id]
    (loop [[mod & more] (if (seq? module-id) module-id [module-id])
           line 0
           acc []]
      (if mod
-       (let [output (run-corpus (mod @module->corpus) mod)
+       (let [output (run-corpus (get-in @language->data [mod :corpus]) mod)
              failed (remove (comp (partial = 0) first) output)]
          (doseq [[[error-count text error-msg] i] (map vector failed (iterate inc line))]
            (printf "%d FAIL \"%s\"\n    Expected %s\n" i text (first error-msg))
@@ -422,7 +421,7 @@
               [module targets]                              ; targets specify all the dims we should extract
               (let [module (keyword module)
                     pic-context (generate-context context)]
-                (when-not (module @module->rules)
+                (when-not (get-in @language->data [module :corpus])
                   (throw (ex-info "Unknown duckling module" {:module module})))
                 (->> (analyze sentence pic-context module targets leven-stash)
                   :winners
