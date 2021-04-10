@@ -1,16 +1,16 @@
 (ns duckling.learn
   (:require
-    [duckling.engine :as engine]
-    [duckling.ml.naivebayes :as naive]
-    [duckling.util :as util]
-    [clojure.set :as sets]
-    [clojure.pprint :refer [pprint]])
+   [duckling.engine :as engine]
+   [duckling.ml.naivebayes :as naive]
+   [duckling.util :as util]
+   [clojure.set :as sets]
+   [clojure.pprint :refer [pprint]])
   (:use [clojure.tools.logging]))
 
 (defn extract-route-features
   "Extracts names of previous routes used to produce this route token.
    This is the feature extractor we use."
-   ; FIXME the grain feature should be moved to the time module
+  ; FIXME the grain feature should be moved to the time module
   [token]
   (let [rules (reduce str (map #(get-in % [:rule :name]) (:route token)))
         time-tokens (filter #(= :time (:dim %)) (:route token))
@@ -41,34 +41,34 @@
   [s context check rules feature-extractor dataset]
   (debugf "learning %s %s\n" s check)
   (let [fc-tokens (->> (engine/pass-all s rules nil)
-                       (filter #(and (:pos %) (= (count s) (- (:end %) (:pos %)))))
-                       (mapcat #(engine/resolve-token % context nil)) ; fully-covering tokens
-                       (map #(assoc % :check (check context %))))
+                    (filter #(and (:pos %) (= (count s) (- (:end %) (:pos %)))))
+                    (mapcat #(engine/resolve-token % context nil)) ; fully-covering tokens
+                    (map #(assoc % :check (check context %))))
         fc-tokens-ok (remove :check fc-tokens)
         fc-tokens-ko (filter :check fc-tokens)
-        found     (not (empty? fc-tokens-ok))
+        found (not (empty? fc-tokens-ok))
         _ (when-not found (prn "not found" s))
         tokens-ok (apply sets/union
-                         (for [tok fc-tokens-ok]
-                           ;; all subtokens of OK fully covering tokens which have a :rule
-                           (sets/select :rule (subtokens tok))))
+                    (for [tok fc-tokens-ok]
+                      ;; all subtokens of OK fully covering tokens which have a :rule
+                      (sets/select :rule (subtokens tok))))
         tokens-ko (-> (apply sets/union
-                             (for [tok fc-tokens-ko]
-                               ;; remove OK tokens from KO set
-                               (sets/select :rule (subtokens tok))))
-                      (sets/difference tokens-ok))
+                        (for [tok fc-tokens-ko]
+                          ;; remove OK tokens from KO set
+                          (sets/select :rule (subtokens tok))))
+                    (sets/difference tokens-ok))
         f (fn [ds tok]
             (update-in ds [(-> tok :rule :name)]
-                       #(conj % [(feature-extractor tok) true])))
+              #(conj % [(feature-extractor tok) true])))
         dataset-updated-with-positives (reduce f dataset tokens-ok)
         f2 (fn [ds tok]
              (update-in ds [(-> tok :rule :name)]
-                        #(conj % [(feature-extractor tok) false])))
+               #(conj % [(feature-extractor tok) false])))
         final-dataset (reduce f2 dataset-updated-with-positives tokens-ko)]
     #_(when (= s "de 9h30 jusqu'à 11h jeudi")
-      (prn (count fc-tokens-ok) (count fc-tokens-ko))
-      (doseq [t tokens-ok]
-        (prn (-> t :rule :name) (extract-route-features t))))
+        (prn (count fc-tokens-ok) (count fc-tokens-ko))
+        (doseq [t tokens-ok]
+          (prn (-> t :rule :name) (extract-route-features t))))
     final-dataset))
 
 (defn corpus->dataset
@@ -77,11 +77,11 @@
   (let [sentences-and-check
         (for [test tests
               text (:text test)]
-            [text (first (:checks test))])]
+          [text (first (:checks test))])]
     (reduce (fn [dataset [text check]]
               (sentence->dataset text context check rules feature-extractor dataset))
-            {} ;; initial dataset
-            sentences-and-check)))
+      {}                                                    ;; initial dataset
+      sentences-and-check)))
 
 (defn print-dataset
   "Print dataset to STDOUT"
@@ -96,9 +96,9 @@
   [route classifiers]
   (if-let [classifier (get classifiers (-> route :rule :name))]
     (let [feat-count (-> route extract-route-features frequencies)
-          [_ prob]   (naive/classify classifier feat-count)]
+          [_ prob] (naive/classify classifier feat-count)]
       (+ prob
-         (reduce + (map #(route-prob % classifiers) (:route route)))))
+        (reduce + (map #(route-prob % classifiers) (:route route)))))
     0))
 
 (defn judge-ml
@@ -106,12 +106,12 @@
   Computes prob of each rule according to their routes."
   [stash classifiers]
   (when-let [candidates (->> stash
-                             (util/keep-max (fn [{:keys [end pos]}]
-                                              (if (some nil? [end pos])
-                                                0
-                                                (- end pos))))
-                             (filter :pred)
-                             not-empty)]
+                          (util/keep-max (fn [{:keys [end pos]}]
+                                           (if (some nil? [end pos])
+                                             0
+                                             (- end pos))))
+                          (filter :pred)
+                          not-empty)]
     (apply max-key #(route-prob % classifiers) candidates)))
 
 (defn- train-rule

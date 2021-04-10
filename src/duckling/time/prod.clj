@@ -24,12 +24,12 @@
             :pred pred}))
 
 (defn intersect
-  "Combines several time tokens." ; FIXME shouldn't accept that both have timezone
+  "Combines several time tokens."                           ; FIXME shouldn't accept that both have timezone
   ([tok1 tok2]
    (ti (p/compose (:pred tok1) (:pred tok2))
-       {:timezone (or (:timezone tok1) (:timezone tok2))
-        :direction (or (:direction tok1) (:direction tok2))}))
-        ;; FIXME direction shouldn't appear in both tokens
+     {:timezone (or (:timezone tok1) (:timezone tok2))
+      :direction (or (:direction tok1) (:direction tok2))}))
+  ;; FIXME direction shouldn't appear in both tokens
   ([tok1 tok2 & more]
    (apply intersect (intersect tok1 tok2) more)))
 
@@ -56,11 +56,11 @@
   (let [grain1 (-> tok1 :pred meta :grain)
         grain2 (-> tok2 :pred meta :grain)
         incl (or (= :day grain1 grain2) to-inclusive?)]
-  ;(prn "interval called")
-  (if true;(=  )
-    (ti (p/intervals (:pred tok1) (:pred tok2) incl)
+    ;(prn "interval called")
+    (if true                                                ;(=  )
+      (ti (p/intervals (:pred tok1) (:pred tok2) incl)
         {:timezone (or (:timezone tok1) (:timezone tok2))})
-    {:dim :invalid})))
+      {:dim :invalid})))
 
 ;; if we say "Monday" and today is Monday, we mean next Monday
 ;; hence the :not-immediate that modifies resolution
@@ -101,14 +101,14 @@
 
 (defn hour-minute [h m & [twelve-hour-clock?]]
   (assoc (intersect (hour h twelve-hour-clock?)
-                    (minute m))
-         :form :time-of-day))
+           (minute m))
+    :form :time-of-day))
 
 (defn hour-minute-second [h m s & [twelve-hour-clock?]]
   (assoc (intersect (hour h twelve-hour-clock?)
-                    (minute m)
-                    (sec s))
-         :form :time-of-day))
+           (minute m)
+           (sec s))
+    :form :time-of-day))
 
 ; twelve-hour clock is 12, 1, 2, 3, ... 11 (no 0)
 
@@ -124,7 +124,7 @@
                        [[(hour 0) (hour 12) false] :am]
                        [[(hour 12) (hour 0) false] :pm])]
     (-> (intersect tod (apply interval p))
-        (assoc :form :time-of-day :ampm meridiem))))
+      (assoc :form :time-of-day :ampm meridiem))))
 
 (defn cycle-nth [grain n]
   (ti (p/take-the-nth (p/cycle grain) n)))
@@ -155,15 +155,15 @@
 
 (defn pred-nth-after [cyclic base n]
   (ti (p/take-the-nth-after (:pred cyclic) (:pred base) n {:not-immediate true})
-      {:timezone (:timezone base)}))
+    {:timezone (:timezone base)}))
 
 (defn parse-dmy
   "Build date from day, month, year as strings of numerics.
    Please provide at least one non-nil argument"
   [day-string mo-string y-string convert-two-digit-year?]
   (let [day (when day-string (day-of-month (Integer/parseInt day-string)))
-        mo  (when mo-string (month (Integer/parseInt mo-string)))
-        y   (when y-string (year (Integer/parseInt y-string)))
+        mo (when mo-string (month (Integer/parseInt mo-string)))
+        y (when y-string (year (Integer/parseInt y-string)))
         v (remove nil? [y mo day])]
     (if (= 1 (count v)) (first v) (apply intersect v))))
 
@@ -175,13 +175,13 @@
   the one just below the duration grain. See pred.clj for conversion."
   [duration]
   (ti (p/shift-duration (p/take-the-nth (p/cycle :second) 0)
-                        duration)))
+        duration)))
 
 (defn duration-ago
   "See in-duration"
   [duration]
   (ti (p/shift-duration (p/take-the-nth (p/cycle :second) 0)
-                        (t/negative-period duration))))
+        (t/negative-period duration))))
 
 
 (defn duration-after
@@ -215,7 +215,7 @@
   (cond
     (= 0 n) acc
     (not (= 0 (mod n 10))) acc
-    :else                  (rounditude (/ n 10) (inc acc))))
+    :else (rounditude (/ n 10) (inc acc))))
 
 (defn compose-numbers
   "'add' numbers for '(two thousands) (three hundreds)'"
@@ -224,7 +224,7 @@
     {:dim :number
      :integer (and (:integer n1) (:integer n2))
      :value (+ (:value n1) (:value n2))}
-    {:invalid true})) ; TODO return nil and manage "abortion" in engine
+    {:invalid true}))                                       ; TODO return nil and manage "abortion" in engine
 
 ; finance helpers
 (defn compose-money
@@ -235,7 +235,7 @@
      :value amount
      :unit (:unit m1)
      :fields {(:unit m1) (:value amount)}
-   })
+     })
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;
@@ -246,7 +246,7 @@
   [dim-val & predicates]
   (fn [token]
     (and (= dim-val (:dim token))
-         (every? #(% token) predicates))))
+      (every? #(% token) predicates))))
 
 (defn integer
   "Return a func (duckling pattern) checking that dim=number and integer=true,
@@ -254,7 +254,7 @@
   [& [min max & predicates]]
   (fn [token]
     (and (= :number (:dim token))
-         (:integer token)
-         (or (nil? min) (<= min (:value token)))
-         (or (nil? max) (<= (:value token) max))
-         (every? #(% token) predicates))))
+      (:integer token)
+      (or (nil? min) (<= min (:value token)))
+      (or (nil? max) (<= (:value token) max))
+      (every? #(% token) predicates))))

@@ -11,8 +11,8 @@
   (let [[date-fields other-keys-and-values] (split-with integer? args)
         token-fields (into {} (map vec (partition 2 other-keys-and-values)))
         date (-> (apply time/t -2 date-fields)
-                 (?> (:grain token-fields) (assoc :grain (:grain token-fields)))
-                 (?> (:timezone token-fields) (assoc :timezone (:timezone token-fields))))]
+               (?> (:grain token-fields) (assoc :grain (:grain token-fields)))
+               (?> (:timezone token-fields) (assoc :timezone (:timezone token-fields))))]
     [date token-fields]))
 
 (defn datetime
@@ -20,13 +20,13 @@
   [& args]
   (let [[date token-fields] (vec->date-and-map args)]
     (fn [context token]
-        (when-not
-          (and
-            (= :time (:dim token))
-            (util/hash-match (select-keys token-fields [:direction :precision])
-                             token)
-            (= (-> token :value) date))
-          [date (:value token)]))))
+      (when-not
+       (and
+         (= :time (:dim token))
+         (util/hash-match (select-keys token-fields [:direction :precision])
+           token)
+         (= (-> token :value) date))
+        [date (:value token)]))))
 
 (defn datetime-interval
   "Creates a datetime interval checker function"
@@ -36,9 +36,9 @@
         date (time/interval start end)]
     (fn [context {:keys [value dim] :as token}]
       (when-not
-        (and
-          (= :time dim)
-          (= value date))
+       (and
+         (= :time dim)
+         (= value date))
         [date value]))))
 
 (defn number
@@ -46,18 +46,18 @@
   If value is integer, it also checks :integer true"
   [value]
   (fn [_ token] (when-not
-                  (and
-                    (= :number (:dim token))
-                    (or (not (integer? value)) (:integer token))
-                    (= (:value token) value))
+                 (and
+                   (= :number (:dim token))
+                   (or (not (integer? value)) (:integer token))
+                   (= (:value token) value))
                   [value (:value token)])))
 
 (defn ordinal
   [value]
   (fn [_ token] (when-not
-                  (and
-                    (= :ordinal (:dim token))
-                    (= (:value token) value))
+                 (and
+                   (= :ordinal (:dim token))
+                   (= (:value token) value))
                   [value (:value token)])))
 
 (defn temperature
@@ -65,31 +65,31 @@
   [value' & [unit' precision']]
   (fn [_ {:keys [dim value unit precision] :as token}]
     (not (and
-                  (= :temperature dim)
-                  (= value' value)
-                  (= unit' unit)
-                  (= precision' precision)))))
+           (= :temperature dim)
+           (= value' value)
+           (= unit' unit)
+           (= precision' precision)))))
 
 (defn distance
   "Create a distance condition"
   [value' & [unit' normalized' precision']]
   (fn [_ {:keys [dim value unit normalized precision] :as token}]
     (not (and
-                  (= :distance dim)
-                  (= value' value)
-                  (= unit' unit)
-                  (= normalized' normalized)
-                  (= precision' precision)))))
+           (= :distance dim)
+           (= value' value)
+           (= unit' unit)
+           (= normalized' normalized)
+           (= precision' precision)))))
 
 (defn money
   "Create a amount-of-money condition"
   [value' & [unit' precision']]
   (fn [_ {:keys [dim value unit precision] :as token}]
     (not (and
-                  (= :amount-of-money dim)
-                  (= value' value)
-                  (= unit' unit)
-                  (= precision' precision)))))
+           (= :amount-of-money dim)
+           (= value' value)
+           (= unit' unit)
+           (= precision' precision)))))
 
 (defn place
   "Create a place checker"
@@ -122,7 +122,7 @@
   (fn [token _] (and
                   (= :volume (:dim token))
                   (= value (-> token :value :value))
-                  (= unit  (-> token :value :unit))
+                  (= unit (-> token :value :unit))
                   (= normalized (-> token :value :normalized)))))
 
 
@@ -132,13 +132,13 @@
   [& [min max & predicates]]
   (fn [token]
     (and (= :number (:dim token))
-         (:integer token)
-         (or (nil? min) (<= min (:value token)))
-         (or (nil? max) (<= (:value token) max))
-         (every? #(% token) predicates))))
+      (:integer token)
+      (or (nil? min) (<= min (:value token)))
+      (or (nil? max) (<= (:value token) max))
+      (every? #(% token) predicates))))
 
 (defn corpus
-  "Parse corpus" ;; TODO should be able to load several files, like rules
+  "Parse corpus"                                            ;; TODO should be able to load several files, like rules
   [forms]
   (-> (fn [state [head & more :as forms] context tests]
         (if head
@@ -146,27 +146,27 @@
             :init (cond (map? head) (recur :test-strings more
                                       head
                                       (conj tests {:text [], :checks []}))
-                    :else (throw (Exception. (str "Invalid form at init state. A map is expected for context:" (prn-str head)))))
+                        :else (throw (Exception. (str "Invalid form at init state. A map is expected for context:" (prn-str head)))))
 
             :test-strings (cond (string? head) (recur :test-strings more
                                                  context
                                                  (assoc-in tests
                                                    [(dec (count tests)) :text (count (:text (peek tests)))]
                                                    head))
-                            (fn? head) (recur :test-checks forms
-                                         context
-                                         tests)
-                            :else (throw (Exception. (str "Invalid form at test-strings state: " (prn-str head)))))
+                                (fn? head) (recur :test-checks forms
+                                             context
+                                             tests)
+                                :else (throw (Exception. (str "Invalid form at test-strings state: " (prn-str head)))))
 
             :test-checks (cond (fn? head) (recur :test-checks more
                                             context
                                             (assoc-in tests
                                               [(dec (count tests)) :checks (count (:checks (peek tests)))]
                                               head))
-                           (string? head) (recur :test-strings forms
-                                            context
-                                            (conj tests {:text [], :checks []}))
-                           :else (throw (Exception. (str "Invalid form at test-checks stats:" (prn-str head))))))
+                               (string? head) (recur :test-strings forms
+                                                context
+                                                (conj tests {:text [], :checks []}))
+                               :else (throw (Exception. (str "Invalid form at test-checks stats:" (prn-str head))))))
           {:context context, :tests tests}))
     (apply [:init forms [] []])))
 

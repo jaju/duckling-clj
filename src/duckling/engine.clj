@@ -22,10 +22,10 @@
          res []]
     (if (.find m)
       (recur m
-             (conj res
-                   [(.start m)
-                    (.group m)
-                    (vec (map #(.group m (int %)) (range 1 (inc (.groupCount m)))))]))
+        (conj res
+          [(.start m)
+           (.group m)
+           (vec (map #(.group m (int %)) (range 1 (inc (.groupCount m)))))]))
       res)))
 
 (defn- lookup-re
@@ -37,13 +37,13 @@
                     (do
                       (when (clojure.string/blank? word)
                         (throw (ex-info "Zero-length or blank captures forbidden"
-                                        {:regex regex :s s})))
+                                 {:regex regex :s s})))
                       {:pos (+ position pos)
                        :end (+ position pos (count word))
                        :text word
                        :groups groups}))]
       (->> matches
-           (filter #(util/separated-substring? s (:pos %) (:end %)))))
+        (filter #(util/separated-substring? s (:pos %) (:end %)))))
     (catch Exception e
       (throw (ex-info "@lookup-re" {:exception e :s s :regex regex})))))
 
@@ -85,22 +85,22 @@
   "Builds a new rule"
   [name pattern production]
   (if (not (string? name)) (throw (Exception. "Can't accept rule without name.")))
-  (let [duckling-helper-ns (the-ns 'duckling.time.prod) ; could split time.patterns and time.prod helpers
+  (let [duckling-helper-ns (the-ns 'duckling.time.prod)     ; could split time.patterns and time.prod helpers
         pattern (binding [*ns* duckling-helper-ns] (eval pattern))
         pattern-vec (if (vector? pattern) pattern [pattern])]
     {:name name
      :pattern (map pattern-fn pattern-vec)
      :production (binding [*ns* duckling-helper-ns]
                    (eval `(fn ~(vec (map #(symbol (str "%" %))
-                                        (range 1 (inc (count pattern-vec)))))
-                                        ~production)))}))
+                                      (range 1 (inc (count pattern-vec)))))
+                            ~production)))}))
 
 (defn rules
   "Parses a set of rules and 'add' them into 'the-rules'.
   Can be called several times, since rules might spread into several files."
   [forms]
   (->> (partition 3 forms)
-       (mapv (partial apply build-rule))))
+    (mapv (partial apply build-rule))))
 
 ;;
 ;; Runtime parsing (core algorithm)
@@ -112,7 +112,7 @@
   {:pre [(number? position) (map? token) (string? s)]}
   (try
     (if (< (:pos token) position)
-      false ; token starts before position... no chance it's following position
+      false                                                 ; token starts before position... no chance it's following position
       (let [separation (subs s position (:pos token))]
         (re-find #"^[\p{Space}-]*$" separation)))
     (catch Exception e
@@ -128,15 +128,15 @@
     (try
       (when-let [product (apply (:production rule) route)]
         (merge product
-               {:text (subs sentence pos end), :pos pos, :end end, :rule rule, :route route}))
+          {:text (subs sentence pos end), :pos pos, :end end, :rule rule, :route route}))
       (catch Exception e
         (throw (ex-info (format "Exception duckling@produce span='%s' rule='%s' sentence='%s' ex='%s' stack=%s"
-                                    (subs sentence pos end)
-                                    (:name rule)
-                                    sentence
-                                    e
-                                    (with-out-str (clojure.stacktrace/print-stack-trace e)))
-                        {:exception e}))))))
+                          (subs sentence pos end)
+                          (:name rule)
+                          sentence
+                          e
+                          (with-out-str (clojure.stacktrace/print-stack-trace e)))
+                 {:exception e}))))))
 
 (defn- never-produced?
   "Check if a token, about to be produced by 'rule' on 'route', is not already in the 'stash'.
@@ -152,7 +152,7 @@
   [pattern stash]
   (letfn [(match-recur [pattern first-pattern? stash position route results]
             (if (empty? pattern)
-              (cons route results) ;; add "finished" route to results and return
+              (cons route results)                          ;; add "finished" route to results and return
               (try
                 (apply concat
                   (for [token ((first pattern) stash position)
@@ -167,9 +167,9 @@
                   ;; (.printStackTrace e) - probably use logging/debug and turn logging output
                   ;; (prn stash)
                   (throw (ex-info (format "Exception @match stack=%s stash=%s"
-                                          (with-out-str (clojure.stacktrace/print-stack-trace e))
-                                          (with-out-str (pr stash)))
-                                  {:exception e}))
+                                    (with-out-str (clojure.stacktrace/print-stack-trace e))
+                                    (with-out-str (pr stash)))
+                           {:exception e}))
                   ))))]
     (match-recur pattern true stash 0 [] [])))
 
@@ -177,13 +177,13 @@
   "Make one pass of each rule on the stash.
   Returns a new stash augmented with the seq of produced tokens."
   [stash rules sentence]
-  (into stash ; we want a vector, not a list, or into changes the order of items
+  (into stash                                               ; we want a vector, not a list, or into changes the order of items
     (apply concat
       (for [rule rules]
         (try
-          (->> (match (:pattern rule) stash) ; get the routes that match this rule
-               (filter (partial never-produced? stash rule)) ; remove what we already have
-               (map (fn [route] (produce rule route sentence)))) ; produce
+          (->> (match (:pattern rule) stash)                ; get the routes that match this rule
+            (filter (partial never-produced? stash rule))   ; remove what we already have
+            (map (fn [route] (produce rule route sentence)))) ; produce
           (catch Exception e
             (throw (Exception. (str "Exception matching rule: "
                                  (:name rule) " " e)))))))))

@@ -7,4 +7,4 @@
 
 (deftest partialmax
   (is (= [[6] [1 2]]
-         (split-by-partial-max compare [1 2 6] [1 2 3 4]))))
+        (split-by-partial-max compare [1 2 6] [1 2 3 4]))))

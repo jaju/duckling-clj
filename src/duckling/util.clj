@@ -21,9 +21,9 @@
   (letfn [(get-char-class [s] (cond (re-find #"\p{javaLowerCase}" s) :lower
                                     (re-find #"\p{javaUpperCase}" s) :upper
                                     (re-find #"\p{Digit}" s) :digit
-                                    :else s))] ; its own class
+                                    :else s))]              ; its own class
     (not= (get-char-class (str char1))
-          (get-char-class (str char2)))))
+      (get-char-class (str char2)))))
 
 (defn separated-substring?
   "Since we match regexes without whitespace delimitator, we have to check
@@ -33,9 +33,9 @@
   [sentence pos end]
   {:pre [(<= end (count sentence))]}
   (and (or (= 0 pos)
-           (valid-limit? (nth sentence (dec pos)) (nth sentence pos)))
-       (or (= (count sentence) end)
-           (valid-limit? (nth sentence (dec end)) (nth sentence end)))))
+         (valid-limit? (nth sentence (dec pos)) (nth sentence pos)))
+    (or (= (count sentence) end)
+      (valid-limit? (nth sentence (dec end)) (nth sentence end)))))
 
 (defn keep-max
   "Returns the sublist of elem for which f is maxed"
@@ -58,7 +58,7 @@
   (let [splitted (group-by
                    (fn [x] (every? #(let [p (partial-order-fn x %)]
                                       (or (nil? p) (>= p 0)))
-                                   base-coll))
+                             base-coll))
                    coll)]
     [(splitted true) (splitted false)]))
 
@@ -81,11 +81,11 @@
   [[a b] [c d]]
   (cond
     (< a c)
-    (when (>= b d) 1) ; nil (not comparable) in all other cases
+    (when (>= b d) 1)                                       ; nil (not comparable) in all other cases
     (= a c)
     (compare b d)
     (> a c)
-    (when (>= d b) -1))) ; or nil
+    (when (>= d b) -1)))                                    ; or nil
 
 (defn spprint
   "Pretty-prints to a string (useful to print hashmaps)"

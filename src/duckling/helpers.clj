@@ -8,15 +8,15 @@
                     (rest args-body)
                     args-body)]
     (merge meta-map
-           `{:dim ~(keyword dim)
-             :pred (fn ~@args-body)})))
+      `{:dim ~(keyword dim)
+        :pred (fn ~@args-body)})))
 
 (defn dim
   "Returns a func checking dim of a token and additional preds"
   [dim-val & predicates]
   (fn [token]
     (and (= dim-val (:dim token))
-         (every? #(% token) predicates))))
+      (every? #(% token) predicates))))
 
 (defn integer
   "Return a func (duckling pattern) checking that dim=number and integer=true,
@@ -24,7 +24,7 @@
   [& [min max & predicates]]
   (fn [token]
     (and (= :number (:dim token))
-         (:integer token)
-         (or (nil? min) (<= min (:val token)))
-         (or (nil? max) (<= (:val token) max))
-         (every? #(% token) predicates))))
+      (:integer token)
+      (or (nil? min) (<= min (:val token)))
+      (or (nil? max) (<= (:val token) max))
+      (every? #(% token) predicates))))

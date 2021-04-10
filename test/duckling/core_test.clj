@@ -25,7 +25,7 @@
 
 (deftest select-winners-test
   (is (= '({:value "ok", :pred 9} {:value "ok", :pred 6})
-         (select-winners' compare-fn (constantly nil) resolve-fn tokens))))
+        (select-winners' compare-fn (constantly nil) resolve-fn tokens))))
 
 (defn diag-corpus
   "Returns :ok if the corpus runs well, or a string with list of failures otherwise."
@@ -33,9 +33,9 @@
   (if (= 0 (reduce #(+ %1 (first %2)) 0 run-corpus-output)) ;; no fail
     :ok
     (->> run-corpus-output
-         (filter #(not= 0 (first %)))
-         (map second)
-         (reduce #(str %1 "\n" %2)))))
+      (filter #(not= 0 (first %)))
+      (map second)
+      (reduce #(str %1 "\n" %2)))))
 
 (defmacro with-timeout [millis res & body]
   `(let [future# (future ~@body)]
@@ -51,10 +51,10 @@
   (testing "fr and en"
     (are [lang] (let [module (format "%s$core" lang)]
                   (= :ok (-> (get-in @language->data [module :corpus])
-                             (run-corpus module)
-                             diag-corpus)))
-      "fr"
-      "en"))
+                           (run-corpus module)
+                           diag-corpus)))
+                "fr"
+                "en"))
   (testing "Public API (extract)"
     (is (= [{:end 12
              :start 0
@@ -62,15 +62,15 @@
                      '({:type "value"
                         :value "2014-01-01T00:00:00.000-02:00"
                         :grain :month})
-                      :type "value"
-                      :value "2014-01-01T00:00:00.000-02:00"
-                      :grain
-                      :month}
+                     :type "value"
+                     :value "2014-01-01T00:00:00.000-02:00"
+                     :grain
+                     :month}
              :body "january 2014"
              :label "T"}]
-           (extract "january 2014" (default-context :corpus) nil [{:module "en$core"
-                                                                   :dim "time"
-                                                                   :label "T"}]))))
+          (extract "january 2014" (default-context :corpus) nil [{:module "en$core"
+                                                                  :dim "time"
+                                                                  :label "T"}]))))
   (testing "Public API (extract) with leven-stash"
     (is (= [{:end 9
              :start 0
@@ -78,40 +78,40 @@
                      :unit "brasse"}
              :body "2 brasses"
              :label "T"}]
-           (extract "2 brasses" (default-context :corpus) [{:dim :leven-unit
-                                                            :value "brasse"
-                                                            :pos 2
-                                                            :end 9}]
-                                                          [{:module "en$core"
-                                                            :dim "quantity"
-                                                            :label "T"}]))))
+          (extract "2 brasses" (default-context :corpus) [{:dim :leven-unit
+                                                           :value "brasse"
+                                                           :pos 2
+                                                           :end 9}]
+            [{:module "en$core"
+              :dim "quantity"
+              :label "T"}]))))
   (testing "Very big one"
     (is (< 1
-           (count
-             (with-timeout 10000 "TIMEOUT!!"
-                           (extract "Oct. 12 from 2 to 5 p.m. Monday-Friday, Sept. 7-March 1, 8 a.m.-noon, 1-5 p.m."
-                                    (default-context :corpus) nil [{:module "en$core"
-                                                                    :dim "time"
-                                                                    :label "T"}])))))))
+          (count
+            (with-timeout 10000 "TIMEOUT!!"
+              (extract "Oct. 12 from 2 to 5 p.m. Monday-Friday, Sept. 7-March 1, 8 a.m.-noon, 1-5 p.m."
+                (default-context :corpus) nil [{:module "en$core"
+                                                :dim "time"
+                                                :label "T"}])))))))
 
 (deftest load!-api-test
   (with-redefs [get-dims (constantly [:number :time])]
     (let [check (fn [arg exp]
                   (= (map-vals set (map-from-keys get-dims exp))
-                     (map-vals set (load! arg))))]
+                    (map-vals set (load! arg))))]
       (testing "load! should load all languages by default"
         (with-redefs [res/get-files (constantly ["numbers.clj"])
                       res/get-subdirs (constantly ["en" "zh" "pt"])]
           (= (load!) [:en$core :zh$core :pt$core])))
       (testing "load! should accept a list of languages"
         (are [arg exp] (check arg exp)
-          ["fr"] [:fr$core]
-          ["foo" "bar"] []
-          ["bar" "es" "pt" "ru"] [:es$core :pt$core :ru$core]))
+                       ["fr"] [:fr$core]
+                       ["foo" "bar"] []
+                       ["bar" "es" "pt" "ru"] [:es$core :pt$core :ru$core]))
       (testing "load! should accept a map config"
         (is (check {:en$numbers {:corpus ["numbers"] :rules ["numbers"]}} [:en$numbers])))
       (testing "load! should return a map of loaded modules with dimensions"
         (are [arg exp] (check arg exp)
-          ["fr"] [:fr$core]
-          ["fr" "foo" "en"] [:fr$core :en$core]
-          {:en$numbers {:corpus ["numbers"] :rules ["numbers"]}} [:en$numbers])))))
+                       ["fr"] [:fr$core]
+                       ["fr" "foo" "en"] [:fr$core :en$core]
+                       {:en$numbers {:corpus ["numbers"] :rules ["numbers"]}} [:en$numbers])))))

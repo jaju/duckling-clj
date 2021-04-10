@@ -13,11 +13,11 @@
   "Whether filename is a direct child of prefix."
   [^String prefix ^String filename]
   (let [slashes (->> [filename prefix]
-                     (map #(->> % (filter (partial = \/)) count))
-                     (apply -))
+                  (map #(->> % (filter (partial = \/)) count))
+                  (apply -))
         is-dir? (dir? filename)]
     (or (and (not is-dir?) (= 1 slashes))
-        (and is-dir? (= 2 slashes)))))
+      (and is-dir? (= 2 slashes)))))
 
 (defn direct-child-name
   "Returns the name of entry if direct child of prefix."
@@ -36,11 +36,11 @@
    Appends a slash to directories."
   [^URL file-url]
   (->> file-url
-       io/file
-       (.listFiles)
-       (map (fn [^File file]
-              (cond-> (.getName file)
-                (.isDirectory file) (str "/"))))))
+    io/file
+    (.listFiles)
+    (map (fn [^File file]
+           (cond-> (.getName file)
+             (.isDirectory file) (str "/"))))))
 
 (defn resource->ls
   "Lists files for url (locally or in jar)"
@@ -50,17 +50,17 @@
         prefix (subs path (+ 2 idx))]
     (if (< -1 idx)
       (->> (jar-url->entries url)
-             (keep (partial direct-child-name prefix)))
+        (keep (partial direct-child-name prefix)))
       (file-url->child-names url))))
 
 (defn ^URL get-resource
   "Finds first available resource with path."
   [^String path]
   (-> (Thread/currentThread)
-      (.getContextClassLoader)
-      (.getResources path)
-      enumeration-seq
-      first))
+    (.getContextClassLoader)
+    (.getResources path)
+    enumeration-seq
+    first))
 
 (defn rm-trailing-slash
   "Removes trailing slash, if present."

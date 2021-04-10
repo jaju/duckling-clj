@@ -19,32 +19,32 @@
 ; week is a special case (it's not a field byitself), it's managed as a special
 ; case in functions
 (def time-fields
-            [[:year    (DateTimeFieldType/year) 0]
-             [:month   (DateTimeFieldType/monthOfYear) 1]
-             [:day     (DateTimeFieldType/dayOfMonth) 1]
-             [:hour    (DateTimeFieldType/hourOfDay) 0]
-             [:minute  (DateTimeFieldType/minuteOfHour) 0]
-             [:second  (DateTimeFieldType/secondOfMinute) 0]
-             [:milliseconds (DateTimeFieldType/millisOfSecond) 0]])
+  [[:year (DateTimeFieldType/year) 0]
+   [:month (DateTimeFieldType/monthOfYear) 1]
+   [:day (DateTimeFieldType/dayOfMonth) 1]
+   [:hour (DateTimeFieldType/hourOfDay) 0]
+   [:minute (DateTimeFieldType/minuteOfHour) 0]
+   [:second (DateTimeFieldType/secondOfMinute) 0]
+   [:milliseconds (DateTimeFieldType/millisOfSecond) 0]])
 
 ; for grain ordering
 (def grain-order (into {} (map vector
-                      [:year :quarter :month :week :day :hour :minute :second]
-                      (range))))
+                            [:year :quarter :month :week :day :hour :minute :second]
+                            (range))))
 
-(def period-fields {:year     [time/years 1]
-                    :quarter  [time/months 3]
-                    :month    [time/months 1]
-                    :week     [time/weeks 1]
-                    :day      [time/days 1]
-                    :hour     [time/hours 1]
-                    :minute   [time/minutes 1]
-                    :second   [time/seconds 1]})
+(def period-fields {:year [time/years 1]
+                    :quarter [time/months 3]
+                    :month [time/months 1]
+                    :week [time/weeks 1]
+                    :day [time/days 1]
+                    :hour [time/hours 1]
+                    :minute [time/minutes 1]
+                    :second [time/seconds 1]})
 
 (defn valid? [{:keys [start grain end] :as t}]
   (and (instance? org.joda.time.DateTime start)
-       (grain-order grain)
-       (or (nil? end) (instance? org.joda.time.DateTime end))))
+    (grain-order grain)
+    (or (nil? end) (instance? org.joda.time.DateTime end))))
 
 (defn ^DateTimeZone zone [timezone]
   (cond (:start timezone) (.getZone ^DateTime (:start timezone))
@@ -69,7 +69,7 @@
    (t :second timezone year month day hour minute second))
   ([grain timezone year month day hour minute second]
    {:start (DateTime. (int year) (int month) (int day) (int hour) (int minute) (int second)
-                      (zone timezone))
+             (zone timezone))
     :grain grain}))
 
 (declare plus)
@@ -110,18 +110,18 @@
         e1 (end t1)
         s2 (:start t2)
         e2 (end t2)]
-  (if (or (= s1 s2) (time/before? s1 s2))
-    (when (time/before? s2 e1)
-      (cond
-        (or (time/before? e2 e1) (= e1 e2))
-        t2
-        (time/before? e1 e2)
-        t1
-        :else
-        {:start s1
-         :grain (max-key grain-order (:grain t1) (:grain t2))
-         :end e2}))
-    (intersect t2 t1))))
+    (if (or (= s1 s2) (time/before? s1 s2))
+      (when (time/before? s2 e1)
+        (cond
+          (or (time/before? e2 e1) (= e1 e2))
+          t2
+          (time/before? e1 e2)
+          t1
+          :else
+          {:start s1
+           :grain (max-key grain-order (:grain t1) (:grain t2))
+           :end e2}))
+      (intersect t2 t1))))
 
 (defn starting-at-the-end-of
   "Build a time that starts at the end of provided time, with same grain"
@@ -183,26 +183,26 @@
     (= :week grain)
     (let [t-dow (day-of-week tt)]
       (-> (plus (round tt :day) :day (- 1 t-dow))
-          (assoc :grain :week)
-          (dissoc :end)))
+        (assoc :grain :week)
+        (dissoc :end)))
 
     (= :quarter grain)
     (let [t-mo (round tt :month)
           mo-delta (mod (dec (month t-mo)) 3)]
       (-> (minus t-mo :month mo-delta)
-          (assoc :grain :quarter)
-          (dissoc :end)))
+        (assoc :grain :quarter)
+        (dissoc :end)))
 
     :else
     (let [fields-to-reset (->> time-fields
-                               (drop-while #(not= grain (first %)))
-                               next)]
+                            (drop-while #(not= grain (first %)))
+                            next)]
       {:start (reduce (fn [tim [_ ty v]]
                         (.withField ^DateTime tim ty (int v))) (:start tt)
-                          fields-to-reset)
-           :grain grain})))
+                fields-to-reset)
+       :grain grain})))
 
-(defn start-before-the-end-of? [t1 t2] ; TODO equality?
+(defn start-before-the-end-of? [t1 t2]                      ; TODO equality?
   {:pre [(valid? t1) (valid? t2)]}
   (let [t2-end (end t2)]
     (time/before? (:start t1) t2-end)))
@@ -259,7 +259,7 @@
   [period]
   (into {} (map (fn [[k v]] [k (- v)]) period)))
 
-(defn period->duration ; TODO use context to get an exact duration
+(defn period->duration                                      ; TODO use context to get an exact duration
   "Convert a period into an amount of seconds. This is approximate, since for
   instance 1 month's duration in seconds depends on which month"
   [period]
