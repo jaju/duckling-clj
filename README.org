@@ -44,3 +44,88 @@ parse a string.
 #+end_src
 
 See the old hosted documentation at [[https://duckling.wit.ai][https://duckling.wit.ai]] for more information.
+
+* Details
+** Looking around
+There are multiple languages supported. For reference, the current list looks like below
+#+begin_src clojure :results output code :exports both
+  ; In the duckling.core namespace
+(available-languages)
+#+end_src
+
+#+RESULTS:
+#+begin_src clojure
+#{"nl"
+  "pt"
+  "en"
+  "zh"
+  "ro"
+  "tr"
+  "it"
+  "vi"
+  "id"
+  "uk"
+  "pl"
+  "my"
+  "sv"
+  "hr"
+  "fr"
+  "da"
+  "de"
+  "nb"
+  "ru"
+  "ga"
+  "es"
+  "ja"
+  "et"
+  "ar"
+  "ko"
+  "he"}
+
+#+end_src
+
+Before you can use duckling, you will need to load the relevant languages' corpuses - datasets that contain examples and rules from which duckling learns how to generalize.
+For example, to load English data, run the following
+
+#+begin_src clojure :results output code :exports both
+  (load! ["en"])
+#+end_src
+
+#+RESULTS:
+#+begin_src clojure
+{:en$core
+ (:phone-number
+  :number
+  :distance
+  :volume
+  :time
+  :temperature
+  :url
+  :email
+  :timezone
+  :leven-unit
+  :leven-product
+  :unit
+  :quantity
+  :amount-of-money
+  :ordinal
+  :unit-of-duration
+  :cycle
+  :duration)}
+
+#+end_src
+
+As you may already notice, there is support for identifying structured information on time, money, phone-numbers, temperature et al.
+The above loaded English language data, now available with the key /:en$core/.
+
+#+begin_src clojure :results output code :exports both
+  (parse :en$core "Meet me at 8")
+#+end_src
+
+#+RESULTS:
+| :dim | :number      | :body |    8 | :value | (:type value :value 8)                                                                                                                                                                                                                                                    | :start | 11 | :end | 12 |         |      |
+| :dim | :distance    | :body |    8 | :value | (:type value :value 8)                                                                                                                                                                                                                                                    | :start | 11 | :end | 12 | :latent | true |
+| :dim | :volume      | :body |    8 | :value | (:type value :value 8)                                                                                                                                                                                                                                                    | :start | 11 | :end | 12 | :latent | true |
+| :dim | :temperature | :body |    8 | :value | (:type value :value 8)                                                                                                                                                                                                                                                    | :start | 11 | :end | 12 | :latent | true |
+| :dim | :time        | :body | at 8 | :value | (:type value :value 2021-04-17T08:00:00.000+05:30 :grain :hour :values ((:type value :value 2021-04-17T08:00:00.000+05:30 :grain :hour) (:type value :value 2021-04-17T20:00:00.000+05:30 :grain :hour) (:type value :value 2021-04-18T08:00:00.000+05:30 :grain :hour))) | :start |  8 | :end | 12 |         |      |
+
