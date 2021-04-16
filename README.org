@@ -123,9 +123,48 @@ The above loaded English language data, now available with the key /:en$core/.
 #+end_src
 
 #+RESULTS:
-| :dim | :number      | :body |    8 | :value | (:type value :value 8)                                                                                                                                                                                                                                                    | :start | 11 | :end | 12 |         |      |
-| :dim | :distance    | :body |    8 | :value | (:type value :value 8)                                                                                                                                                                                                                                                    | :start | 11 | :end | 12 | :latent | true |
-| :dim | :volume      | :body |    8 | :value | (:type value :value 8)                                                                                                                                                                                                                                                    | :start | 11 | :end | 12 | :latent | true |
-| :dim | :temperature | :body |    8 | :value | (:type value :value 8)                                                                                                                                                                                                                                                    | :start | 11 | :end | 12 | :latent | true |
-| :dim | :time        | :body | at 8 | :value | (:type value :value 2021-04-17T08:00:00.000+05:30 :grain :hour :values ((:type value :value 2021-04-17T08:00:00.000+05:30 :grain :hour) (:type value :value 2021-04-17T20:00:00.000+05:30 :grain :hour) (:type value :value 2021-04-18T08:00:00.000+05:30 :grain :hour))) | :start |  8 | :end | 12 |         |      |
+#+begin_src clojure
+({:dim :number,
+  :body "8",
+  :value {:type "value", :value 8},
+  :start 11,
+  :end 12}
+ {:dim :distance,
+  :body "8",
+  :value {:type "value", :value 8},
+  :start 11,
+  :end 12,
+  :latent true}
+ {:dim :volume,
+  :body "8",
+  :value {:type "value", :value 8},
+  :start 11,
+  :end 12,
+  :latent true}
+ {:dim :temperature,
+  :body "8",
+  :value {:type "value", :value 8},
+  :start 11,
+  :end 12,
+  :latent true}
+ {:dim :time,
+  :body "at 8",
+  :value
+  {:type "value",
+   :value "2021-04-17T08:00:00.000+05:30",
+   :grain :hour,
+   :values
+   ({:type "value",
+     :value "2021-04-17T08:00:00.000+05:30",
+     :grain :hour}
+    {:type "value",
+     :value "2021-04-17T20:00:00.000+05:30",
+     :grain :hour}
+    {:type "value",
+     :value "2021-04-18T08:00:00.000+05:30",
+     :grain :hour})},
+  :start 8,
+  :end 12})
+
+#+end_src
 
