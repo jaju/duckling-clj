@@ -6,7 +6,7 @@ A Clojure library originally created by [[https://wit.ai/][Wit.ai]] for identify
 
 * Details
 
-[![Clojars Project](https://clojars.org/org.msync/duckling/latest-version.svg)](http://clojars.org/jaju/duckling-clj)
+Clojars - [[https://clojars.org/jaju/duckling-clj][file:https://clojars.org/org.msync/duckling/latest-version.svg]]
 
 /org.msync/duckling-clj/ is a Clojure library that parses text into structured data:
 
