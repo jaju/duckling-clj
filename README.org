@@ -244,3 +244,24 @@ But you can also supply a /context/ - which has a reference time to consider whi
 
 #+end_src
 
+
+Another interesting example is the following - duckling can consider other signals, like the world _tomorrow_ below.
+#+begin_src  clojure :results output code :exports both
+    (parse :en$core "Meet me tomorrow at 8" [:time] {:reference-time (time/t 0 2020 04 01)})
+#+end_src
+
+#+RESULTS:
+#+begin_src clojure
+({:dim :time,
+  :body "tomorrow at 8",
+  :value
+  {:type "value",
+   :value "2020-04-02T08:00:00.000Z",
+   :grain :hour,
+   :values
+   ({:type "value", :value "2020-04-02T08:00:00.000Z", :grain :hour}
+    {:type "value", :value "2020-04-02T20:00:00.000Z", :grain :hour})},
+  :start 8,
+  :end 21})
+
+#+end_src
