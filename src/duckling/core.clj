@@ -242,15 +242,17 @@
   [lang new-file]
   (-> (format "languages/%s/corpus/%s.clj" lang new-file)
     io/resource
+    slurp
+    read-string
     corpus/read-corpus))
 
-(defn- make-corpus
+(defn- load-corpus
   [lang corpus-files]
   (->> corpus-files
     (pmap (partial read-corpus lang))
     (reduce (partial util/merge-according-to {:tests concat :context merge}))))
 
-(defn- make-rules
+(defn- load-rules
   [lang rules-files]
   (->> rules-files
     (pmap (partial read-rules lang))
@@ -292,8 +294,8 @@
 
 (defn- load-language-data [[lang-key {corpus-files :corpus rules-files :rules}]]
   (let [lang (pluck-lang lang-key)
-        corpus (make-corpus lang corpus-files)
-        rules (make-rules lang rules-files)
+        corpus (load-corpus lang corpus-files)
+        rules (load-rules lang rules-files)
         classifiers (learn/train-classifiers corpus rules learn/extract-route-features)]
     [lang-key
      (map->RCC {:lang lang
@@ -387,10 +389,11 @@
   ([module text dims]
    (parse module text dims (default-context :now)))
   ([module text dims context]
-   (->> (analyze text context module (map (fn [dim] {:dim dim :label dim}) dims) nil)
-     :winners
-     (map #(assoc % :value (engine/export-value % {})))
-     (map #(select-keys % [:dim :body :value :start :end :latent])))))
+   (let [targets (map (fn [x] {:dim x :label x}) dims)]
+     (->> (analyze text context module targets nil)
+       :winners
+       (map #(assoc % :value (engine/export-value % {})))
+       (map #(select-keys % [:dim :body :value :start :end :latent]))))))
 
 
 ;--------------------------------------------------------------------------

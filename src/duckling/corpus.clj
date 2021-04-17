@@ -137,7 +137,7 @@
       (or (nil? max) (<= (:value token) max))
       (every? #(% token) predicates))))
 
-(defn corpus
+(defn corpus-old
   "Parse corpus"                                            ;; TODO should be able to load several files, like rules
   [forms]
   (-> (fn [state [head & more :as forms] context tests]
@@ -170,10 +170,39 @@
           {:context context, :tests tests}))
     (apply [:init forms [] []])))
 
+(defn corpus-2
+  "Parse corpus"
+  [[context & forms]]
+  (let [[corpus- texts+ checks+] (reduce
+                                   (fn [[acc texts checks] form]
+                                     (cond
+                                       (string? form)
+                                       (if-not (empty? checks)
+                                         [(update-in acc [:tests] conj {:text texts :checks checks})
+                                          [form] []]
+                                         [acc (conj texts form) []])
+                                       (fn? form)
+                                       [acc texts (conj checks form)]))
+                                   [{:context context} [] []]
+                                   forms)]
+    (update-in corpus- [:tests] conj {:text texts+ :checks checks+})))
+
+(defn corpus
+  "Parse corpus"
+  [[context & forms]]
+  {:pre [(map? context)]}
+  (let [texts-and-checks (partition 2 (partition-by fn? forms))]
+    (reduce
+      (fn [acc [texts checks]]
+        (assert (every? string? texts))
+        (assert (every? fn? checks))
+        (update acc :tests conj {:text texts :checks checks}))
+      {:context context :tests []}
+      texts-and-checks)))
+
 (defmacro this-ns "Total hack to get ns of this file at compile time" [] *ns*)
 
 (defn read-corpus
   "Read a list of symbol and return a Corpus map {:context {}, :tests []}"
-  [new-file]
-  (let [symbols (read-string (slurp new-file))]
-    (corpus (map #(binding [*ns* (this-ns)] (eval %)) symbols))))
+  [forms]
+  (corpus (map #(binding [*ns* (this-ns)] (eval %)) forms)))
