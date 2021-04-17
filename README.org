@@ -45,8 +45,8 @@ parse a string.
 
 See the old hosted documentation at [[https://duckling.wit.ai][https://duckling.wit.ai]] for more information.
 
-* Working with Duckling
-** Looking around
+** Working with Duckling
+
 There are multiple languages supported. For reference, the current list looks like below
 #+begin_src clojure :results output code :exports both
   ; In the duckling.core namespace
@@ -189,3 +189,58 @@ To parse a sentence, in a known language, use the /parse/ function and the right
 #+end_src
 
 The returned map gives multiple possible interpretations, and the caller should pick the most appropriate one. The type of the value - the /dimension/ - is given under the /:dim/ key. For the dimensions /duckling/ is more confident about, there is no /:latent/ flag. So, in the above example, /:number/ and /:time/ are the most confident interpretations.
+
+If you are sure about what dimension you are looking to extract, you can specify it
+#+begin_src clojure :results output code :exports both
+  (parse :en$core "Meet me at 8" [:time])
+#+end_src
+
+#+RESULTS:
+#+begin_src clojure
+({:dim :time,
+  :body "at 8",
+  :value
+  {:type "value",
+   :value "2021-04-17T20:00:00.000+05:30",
+   :grain :hour,
+   :values
+   ({:type "value",
+     :value "2021-04-17T20:00:00.000+05:30",
+     :grain :hour}
+    {:type "value",
+     :value "2021-04-18T08:00:00.000+05:30",
+     :grain :hour}
+    {:type "value",
+     :value "2021-04-18T20:00:00.000+05:30",
+     :grain :hour})},
+  :start 8,
+  :end 12})
+
+#+end_src
+
+Notice that the results are contextual - dependent on the time when it was called. In the above example, *8* was interpreted to be the closest times when you'd see 8 on the clock - both PM and AM, in the immediate future.
+
+But you can also supply a /context/ - which has a reference time to consider while parsing.
+
+#+begin_src clojure :results output code :exports both
+  (require '[duckling.time.obj :as time])
+  (parse :en$core "Meet me at 8" [:time] {:reference-time (time/t 0 2020 04 01)})
+#+end_src
+
+#+RESULTS:
+#+begin_src clojure
+({:dim :time,
+  :body "at 8",
+  :value
+  {:type "value",
+   :value "2020-04-01T08:00:00.000Z",
+   :grain :hour,
+   :values
+   ({:type "value", :value "2020-04-01T08:00:00.000Z", :grain :hour}
+    {:type "value", :value "2020-04-01T20:00:00.000Z", :grain :hour}
+    {:type "value", :value "2020-04-02T08:00:00.000Z", :grain :hour})},
+  :start 8,
+  :end 12})
+
+#+end_src
+
