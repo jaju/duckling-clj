@@ -8,7 +8,7 @@ A Clojure library originally created by [[https://wit.ai/][Wit.ai]] for identify
 
 [[https://clojars.org/org.msync/duckling][file:https://clojars.org/org.msync/duckling/latest-version.svg]]
 
-/org.msync/duckling-clj/ is a Clojure library that parses text into structured data:
+/org.msync/duckling/ is a Clojure library that parses text into structured data:
 
 #+begin_src clojure
   (parse "the first Tuesday of October")
@@ -247,7 +247,7 @@ But you can also supply a /context/ - which has a reference time to consider whi
 
 Another interesting example is the following - duckling can consider other signals, like the world _tomorrow_ below.
 #+begin_src  clojure :results output code :exports both
-    (parse :en$core "Meet me tomorrow at 8" [:time] {:reference-time (time/t 0 2020 04 01)})
+  (parse :en$core "Meet me tomorrow at 8" [:time] {:reference-time (time/t 0 2020 04 01)})
 #+end_src
 
 #+RESULTS:
