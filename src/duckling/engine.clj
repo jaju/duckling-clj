@@ -176,7 +176,7 @@
 (defn- pass-once
   "Make one pass of each rule on the stash.
   Returns a new stash augmented with the seq of produced tokens."
-  [stash rules sentence]
+  [sentence rules stash]
   (into stash                                               ; we want a vector, not a list, or into changes the order of items
     (apply concat
       (for [rule rules]
@@ -207,7 +207,7 @@
           (when max-stash-reached?
             (warnf "@pass-all reached maximum stash size for sentence '%s'" sentence))
           stash)
-        (recur (pass-once stash rules sentence) (count stash) (dec remaining-iter))))))
+        (recur (pass-once sentence rules stash) (count stash) (dec remaining-iter))))))
 
 (defn maxlen-judge
   "Choose the winning token in the stash."
