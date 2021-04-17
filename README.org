@@ -4,7 +4,7 @@ A Clojure library originally created by [[https://wit.ai/][Wit.ai]] for identify
 
 *Wit.ai* decided to abandon the Clojure version in favour of a [[https://github.com/facebook/duckling][Haskell version]].
 
-* Details
+* Introduction
 
 [[https://clojars.org/org.msync/duckling][file:https://clojars.org/org.msync/duckling/latest-version.svg]]
 
@@ -21,7 +21,7 @@ For the time the hosted Clojure version by *wit.ai* exists, you can try it out a
 
 The original blog post announcement can be found at [[https://wit.ai/blog/2014/10/01/open-source-parser-duckling][https://wit.ai/blog/2014/10/01/open-source-parser-duckling]] for more context.
 
-** Getting started
+** Quick Start
 
 To use Duckling in your project, you just need two functions: `load!` to load the default configuration, and `parse` to
 parse a string.
@@ -45,7 +45,7 @@ parse a string.
 
 See the old hosted documentation at [[https://duckling.wit.ai][https://duckling.wit.ai]] for more information.
 
-* Details
+* Working with Duckling
 ** Looking around
 There are multiple languages supported. For reference, the current list looks like below
 #+begin_src clojure :results output code :exports both
@@ -85,10 +85,10 @@ There are multiple languages supported. For reference, the current list looks li
 #+end_src
 
 Before you can use duckling, you will need to load the relevant languages' corpuses - datasets that contain examples and rules from which duckling learns how to generalize.
-For example, to load English data, run the following
+For example, to load English and French data, run the following
 
 #+begin_src clojure :results output code :exports both
-  (load! ["en"])
+  (load! ["en" "fr"])
 #+end_src
 
 #+RESULTS:
@@ -111,13 +111,33 @@ For example, to load English data, run the following
   :ordinal
   :unit-of-duration
   :cycle
-  :duration)}
+  :duration),
+ :fr$core
+ (:phone-number
+  :time
+  :number
+  :distance
+  :volume
+  :temperature
+  :url
+  :email
+  :timezone
+  :leven-unit
+  :leven-product
+  :quantity
+  :unit
+  :amount-of-money
+  :unit-of-duration
+  :cycle
+  :duration
+  :ordinal)}
 
 #+end_src
 
 As you may already notice, there is support for identifying structured information on time, money, phone-numbers, temperature et al.
-The above loaded English language data, now available with the key /:en$core/.
+The English language data, now available with the key /:en$core/, and French data with the key /:fr$core/
 
+To parse a sentence, in a known language, use the /parse/ function and the right language key. For example
 #+begin_src clojure :results output code :exports both
   (parse :en$core "Meet me at 8")
 #+end_src
@@ -168,3 +188,4 @@ The above loaded English language data, now available with the key /:en$core/.
 
 #+end_src
 
+The returned map gives multiple possible interpretations, and the caller should pick the most appropriate one. The type of the value - the /dimension/ - is given under the /:dim/ key. For the dimensions /duckling/ is more confident about, there is no /:latent/ flag. So, in the above example, /:number/ and /:time/ are the most confident interpretations.
