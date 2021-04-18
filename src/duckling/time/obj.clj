@@ -13,12 +13,9 @@
 ;
 ; Some fn like 'round', 'year' (and all the field getters) operate on the :start
 ; instant. If you use them, make sure it's what you want.
-
-
-
 ; week is a special case (it's not a field byitself), it's managed as a special
 ; case in functions
-(def time-fields
+(def ^:private time-fields
   [[:year (DateTimeFieldType/year) 0]
    [:month (DateTimeFieldType/monthOfYear) 1]
    [:day (DateTimeFieldType/dayOfMonth) 1]
@@ -28,29 +25,30 @@
    [:milliseconds (DateTimeFieldType/millisOfSecond) 0]])
 
 ; for grain ordering
-(def grain-order (into {} (map vector
-                            [:year :quarter :month :week :day :hour :minute :second]
-                            (range))))
+(def grain-order (zipmap
+                   [:year :quarter :month :week :day :hour :minute :second]
+                   (range)))
 
-(def period-fields {:year [time/years 1]
-                    :quarter [time/months 3]
-                    :month [time/months 1]
-                    :week [time/weeks 1]
-                    :day [time/days 1]
-                    :hour [time/hours 1]
-                    :minute [time/minutes 1]
-                    :second [time/seconds 1]})
+(def ^:private period-fields {:year [time/years 1]
+                              :quarter [time/months 3]
+                              :month [time/months 1]
+                              :week [time/weeks 1]
+                              :day [time/days 1]
+                              :hour [time/hours 1]
+                              :minute [time/minutes 1]
+                              :second [time/seconds 1]})
 
-(defn valid? [{:keys [start grain end] :as t}]
+(defn- valid? [{:keys [start end grain]}]
   (and (instance? org.joda.time.DateTime start)
     (grain-order grain)
     (or (nil? end) (instance? org.joda.time.DateTime end))))
 
-(defn ^DateTimeZone zone [timezone]
-  (cond (:start timezone) (.getZone ^DateTime (:start timezone))
-        (instance? DateTime timezone) (.getZone ^DateTime timezone)
-        (integer? timezone) (time/time-zone-for-offset timezone)
-        :else (throw (ex-info "Invalid timezone" {:tz timezone}))))
+(defn- ^DateTimeZone zone [tz?]
+  (cond (:start tz?) (.getZone ^DateTime (:start tz?))
+        (instance? DateTime tz?) (.getZone ^DateTime tz?)
+        (integer? tz?) (time/time-zone-for-offset tz?)
+        (and (vector? tz?) (<= (count tz?) 2)) (apply time/time-zone-for-offset tz?)
+        :else (throw (ex-info "Invalid timezone" {:tz tz?}))))
 
 (defn t
   "Builds a time object with timezone, start and grain.
@@ -74,7 +72,7 @@
 
 (declare plus)
 
-(defn end
+(defn- end
   "Returns the end *instant* of the time object"
   [{:keys [start grain end] :as t}]
   {:pre [(valid? t)]}
@@ -153,8 +151,8 @@
 (defn sec [t]
   (time/second (:start t)))
 
-(defn ->fields [{:keys [start] :as t}]
-  [(time/year start) (time/month start) (time/day start) (time/hour start) (time/minute start) (time/second start)])
+#_(defn ->fields [{:keys [start] :as t}]
+    [(time/year start) (time/month start) (time/day start) (time/hour start) (time/minute start) (time/second start)])
 
 (defn plus
   "Add n grain to tt.
@@ -234,11 +232,11 @@
   {:pre [(period-fields grain) (integer? n)]}
   {grain n})
 
-(defn add-to-period
-  "Adds the given quantity of grain to the period"
-  [p grain n]
-  {:pre [(map? p) (period-fields grain) (pos? n)]}
-  (merge-with + p (period grain n)))
+#_(defn add-to-period
+    "Adds the given quantity of grain to the period"
+    [p grain n]
+    {:pre [(map? p) (period-fields grain) (pos? n)]}
+    (merge-with + p (period grain n)))
 
 (defn plus-period
   "Adds the period to the time object. The resulting grain is the finest."

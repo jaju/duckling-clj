@@ -1,86 +1,107 @@
 * Duckling?
 
+[[https://clojars.org/org.msync/duckling][file:https://clojars.org/org.msync/duckling/latest-version.svg]]
+
 A Clojure library originally created by [[https://wit.ai/][Wit.ai]] for identifying semantic content in text - like time, measurements, currencies and similar.
 
 *Wit.ai* decided to abandon the Clojure version in favour of a [[https://github.com/facebook/duckling][Haskell version]].
 
-* Introduction
+See the old hosted documentation at [[https://duckling.wit.ai][https://duckling.wit.ai]] for more information.
 
-[[https://clojars.org/org.msync/duckling][file:https://clojars.org/org.msync/duckling/latest-version.svg]]
+* Introduction
 
 /org.msync/duckling/ is a Clojure library that parses text into structured data:
 
+#+begin_src clojure :results output code :exports both
+(parse :en$core "the first Tuesday of October")
+#+end_src
+
+#+RESULTS:
 #+begin_src clojure
-  (parse "the first Tuesday of October")
-  ; =>
-  {:value "2014-10-07T00:00:00.000-07:00"
-   :grain :day}
+({:dim :ordinal, :body "first", :value {:value 1}, :start 4, :end 9}
+ {:dim :time,
+  :body "the first Tuesday of October",
+  :value
+  {:type "value",
+   :value "2021-10-05T00:00:00.000+05:30",
+   :grain :day,
+   :values
+   ({:type "value",
+     :value "2021-10-05T00:00:00.000+05:30",
+     :grain :day})},
+  :start 0,
+  :end 28})
+
 #+end_src
 
 For the time the hosted Clojure version by *wit.ai* exists, you can try it out at https://duckling.wit.ai
 
 The original blog post announcement can be found at [[https://wit.ai/blog/2014/10/01/open-source-parser-duckling][https://wit.ai/blog/2014/10/01/open-source-parser-duckling]] for more context.
 
-** Quick Start
-
 To use Duckling in your project, you just need two functions: `load!` to load the default configuration, and `parse` to
 parse a string.
 
-#+begin_src clojure
+#+begin_src clojure :results output code :exports both
   (ns myproject.core
     (:require [duckling.core :as p]))
 
   (p/load!) ;; Load all languages
-
-  (p/parse :en$core ;; core configuration for English ; see also :fr$core, :es$core, :zh$core
+  ;; Or optionally, load only specific languages
+  (load! ["en" "fr"])
+  (parse :en$core ;; core configuration for English ; see also :fr$core, :es$core, :zh$core
            "wake me up the last Monday of January 2015 at 6am"
            [:time]) ;; We are interested in :time expressions only ; see also :duration, :temperature, etc.
 
-  ;; => [{:label :time
-  ;;        :start 15
-  ;;        :end 49
-  ;;        :value {:type "value", :value "2015-01-26T06:00:00.000-02:00", :grain :hour}
-  ;;        :body "last Monday of January 2015 at 6am"}]
-#+end_src
-
-See the old hosted documentation at [[https://duckling.wit.ai][https://duckling.wit.ai]] for more information.
-
-** Working with Duckling
-
-There are multiple languages supported. For reference, the current list looks like below
-#+begin_src clojure :results output code :exports both
-  ; In the duckling.core namespace
-(available-languages)
 #+end_src
 
 #+RESULTS:
 #+begin_src clojure
-#{"nl"
-  "pt"
-  "en"
-  "zh"
-  "ro"
-  "tr"
-  "it"
-  "vi"
-  "id"
-  "uk"
-  "pl"
-  "my"
-  "sv"
-  "hr"
-  "fr"
+  ({:dim :time,
+    :body "last Monday of January 2015 at 6am",
+    :value {:type "value",
+            :value "2015-01-26T06:00:00.000+05:30",
+            :grain :hour,
+            :values ()},
+    :start 15,
+    :end 49})
+#+end_src
+
+* Details
+
+There are multiple languages supported. For reference, the current list looks like below
+#+begin_src clojure :results output code :exports both
+    ; In the duckling.core namespace
+  (available-languages)
+#+end_src
+
+#+RESULTS:
+#+begin_src clojure
+#{"ar"
   "da"
   "de"
-  "nb"
-  "ru"
-  "ga"
+  "en"
   "es"
-  "ja"
   "et"
-  "ar"
+  "fr"
+  "ga"
+  "he"
+  "hr"
+  "id"
+  "it"
+  "ja"
   "ko"
-  "he"}
+  "my"
+  "nb"
+  "nl"
+  "pl"
+  "pt"
+  "ro"
+  "ru"
+  "sv"
+  "tr"
+  "uk"
+  "vi"
+  "zh"}
 
 #+end_src
 

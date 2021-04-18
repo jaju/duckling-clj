@@ -1,4 +1,4 @@
-(defproject org.msync/duckling "0.4.25"
+(defproject org.msync/duckling "0.4.26-SNAPSHOT"
 
   :description "General entities parser"
 
@@ -27,8 +27,8 @@
   :scm {:name "git"
         :url "https://github.com/jaju/duckling-clj"}
 
+  ;; wit.ai is the original dev entity - but we have now forked what they have archived
   :pom-addition [:developers
-                 ;; wit.ai is the originating dev entity
                  [:developer
                   [:name "Ravindra Jaju"]
                   [:url "https://msync.org/"]

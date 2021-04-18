@@ -282,7 +282,7 @@
 (defn- available-languages []
   (->> "languages"
     res/get-subdirs
-    set))
+    (apply sorted-set)))
 
 (defn- config-from-languages [langs]
   (cond-> (available-languages)
