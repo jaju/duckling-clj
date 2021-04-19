@@ -4,19 +4,19 @@
    [duckling.ml.naivebayes :as naive]
    [duckling.util :as util]
    [clojure.set :as sets]
-   [clojure.pprint :refer [pprint]])
-  (:use [clojure.tools.logging]))
+   [clojure.pprint :refer [pprint]]
+   [clojure.tools.logging :use [debugf]]))
 
 (defn extract-route-features
   "Extracts names of previous routes used to produce this route token.
    This is the feature extractor we use."
   ; FIXME the grain feature should be moved to the time module
-  [token]
-  (let [rules (reduce str (map #(get-in % [:rule :name]) (:route token)))
-        time-tokens (filter #(= :time (:dim %)) (:route token))
-        grains (when (< 0 (count time-tokens))
+  [{route :route}]
+  (let [rule-name (reduce str (map #(get-in % [:rule :name]) route))
+        time-tokens (filter #(= :time (:dim %)) route)
+        grains (when (pos? (count time-tokens))
                  (reduce str (map #(-> % :pred meta :grain) time-tokens)))]
-    (filter identity [rules grains])))
+    (filter identity [rule-name grains])))
 
 (defn simple-feature-extractor
   "A very simple one to show if it works. Not used for now.
@@ -73,11 +73,11 @@
 
 (defn corpus->dataset
   "Takes a corpus and a feature extractor and builds a dataset (phase 1.a. on duckling.md)."
-  [{context :context, tests :tests, :as corpus} rules feature-extractor]
-  (let [sentences-and-check
-        (for [test tests
-              text (:text test)]
-          [text (first (:checks test))])]
+  [corpus rules feature-extractor]
+  (let [{:keys [context tests]} corpus
+        sentences-and-check (for [test tests
+                                  text (:text test)]
+                              [text (first (:checks test))])]
     (reduce (fn [dataset [text check]]
               (sentence->dataset text context check rules feature-extractor dataset))
       {}                                                    ;; initial dataset
@@ -124,8 +124,8 @@
 
 (defn train-classifiers
   "Given a corpus and a set of rules, train a classifier per rule"
-  [corpus rules fextractor]
+  [corpus rules feature-extractor]
   (debugf "training with %d tests and %d rules" (count (:tests corpus)) (count rules))
-  (let [dataset (corpus->dataset corpus rules fextractor)]
+  (let [dataset (corpus->dataset corpus rules feature-extractor)]
     (into {} (for [[name examples :as example] dataset]
                [name (train-rule example)]))))
