@@ -312,8 +312,8 @@
   (let [data (->> lang-key->config
                (pmap load-language-data)
                (into {}))]
-    (doseq [[config-key rcc] data]
-      (swap! language->data assoc config-key rcc)))
+    (doseq [[lang-key rcc] data]
+      (swap! language->data assoc lang-key rcc)))
   (->> @language->data
     (pmap (fn [[module {:keys [corpus]}]]
             [module (get-dims module corpus)]))

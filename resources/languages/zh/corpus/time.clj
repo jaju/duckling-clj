@@ -336,7 +336,7 @@
   "3:15PM"
   "3:15p"
   "下午三點十五"
-  (datetime 2013 2 12 15 15
+  (datetime 2013 2 12 15 15)
 
   "下午三点二十分"
   "下午3:20"
@@ -442,7 +442,7 @@
   "兩年前"
   (datetime 2011 2)
   
-  "4pm PST")
+  "4pm PST"
   (datetime 2013 2 12 16 :hour 4 :meridiem :pm :timezone "PST")
 
   "2015年4月14号"

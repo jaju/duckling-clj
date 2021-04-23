@@ -191,11 +191,13 @@
   "Parse corpus"
   [[context & forms]]
   {:pre [(map? context)]}
-  (let [texts-and-checks (partition 2 (partition-by fn? forms))]
+  (let [splits (partition-by fn? forms)
+        texts-and-checks (partition 2 splits)]
     (reduce
       (fn [acc [texts checks]]
         (assert (every? string? texts))
         (assert (every? fn? checks))
+        (assert (= 1 (count checks)))
         (update acc :tests conj {:text texts :checks checks}))
       {:context context :tests []}
       texts-and-checks)))
